@@ -12,6 +12,7 @@ YELLOW = (255, 255, 0)
 BLUE = (100, 149, 237)
 RED = (188, 39, 50)
 DARK_GREY = (80, 78, 81)
+BLACK = (0, 0, 0)
 
 class Planet:
     # e - означает умножение на 10
@@ -58,6 +59,29 @@ class Planet:
         force_y = math.sin(theta) * force
         return force_x, force_y
 
+    def update_position(self, planets):
+        total_f_x = total_f_y = 0
+        for planet in planets:
+            # чтобы не высчитывать позицию между собой и собой в списке
+            if self == planet:
+                continue
+
+            f_x, f_y = self.attraction(planet)
+            total_f_x += f_x
+            total_f_y += f_y
+
+        # a = F / m (по 2 закону Н.)
+        # и здесь мы просто прибавляем к текущей скорости это ускорение
+        # а скорость изменяется по направлению
+        self.x_vel += total_f_x / self.mass * self.TIMESTEP
+        self.y_vel += total_f_y / self.mass * self.TIMESTEP
+
+        # S = v * t
+        # здесь меняем основные координаты по x и y
+        self.x += self.x_vel * self.TIMESTEP
+        self.y += self.y_vel * self.TIMESTEP
+        self.orbit.append((self.x, self.y))
+
 
 def main():
     run = True
@@ -67,20 +91,29 @@ def main():
     sun.sun = True
 
     earth = Planet(-1 * Planet.AU, 0, 16, BLUE, 5.9742 * 10**24)
+    earth.y_vel = 29.783 * 1000
+
     mars = Planet(-1.524 * Planet.AU, 0, 12, RED, 6.39 * 10**23)
+    mars.y_vel = 24.077 * 1000
+
     mercury = Planet(0.387 * Planet.AU, 0, 8, DARK_GREY, 3.30 * 10**23)
+    mercury.y_vel = -47.4 * 1000
+
     venus = Planet(0.723 * Planet.AU, 0, 14, WHITE, 4.8685 * 10**24)
+    venus.y_vel = -35.02 * 1000
 
     planets = [sun, earth, mars, mercury, venus]
 
     while run:
         clock.tick(60)  # сколько раз обновляем этот цикл в секунду
+        WIN.fill(BLACK)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
 
         for planet in planets:
+            planet.update_position(planets)
             # ('что').draw('где')
             planet.draw(WIN)
 
