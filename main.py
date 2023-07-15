@@ -40,6 +40,18 @@ class Planet:
     def draw(self, win):
         x = self.x * self.SCALE + WIDTH / 2
         y = self.y * self.SCALE + HEIGHT / 2
+
+        # рисуем орбиту для данной планеты
+        if len(self.orbit) > 2:
+            updated_points = []
+            for point in self.orbit:
+                x, y = point
+                x = x * self.SCALE + WIDTH / 2
+                y = y * self.SCALE + HEIGHT / 2
+                updated_points.append((x, y))
+
+            pygame.draw.lines(win, self.color, False, updated_points, 2)
+
         pygame.draw.circle(win, self.color, (x, y), self.radius)
 
     def attraction(self, other):
